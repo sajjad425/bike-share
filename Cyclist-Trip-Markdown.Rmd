@@ -1,0 +1,179 @@
+---
+title: "Cyclist Trip"
+author: "Sajjad Qayyum"
+date: "2023-10-26"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Case Study: Cyclist Trip
+
+How Does a Bike-Share Navigate Speedy Success?
+
+### Scenario
+
+You are a junior data analyst working in the marketing analyst team at Cyclistic, a bike-share company in Chicago. The director of marketing believes the company's future success depends on maximizing the number of annual memberships. Therefore, your team wants to understand how casual riders and annual members use Cyclistic bikes differently. From these insights, your team will design a new marketing strategy to convert casual riders into annual members. But first, Cyclistic executives must approve your recommendations, so they must be backed up with compelling data insights and professional data visualizations.
+
+### Characters and Teams:
+
+-   **Cyclistic**: A bike-share program that features more than 5,800 bicycles and 600 docking stations. Cyclistic sets itself apart by also offering reclining bikes, hand tricycles, and cargo bikes, making bike-share more inclusive to people with disabilities and riders who can't use a standard two-wheeled bike. The majority of riders opt for traditional bikes; about 8% of riders use the assistive options. Cyclistic users are more likely to ride for leisure, but about 30% use them to commute to work each day.
+
+-   **Lily Moreno**: The director of marketing and your manager. Moreno is responsible for the development of campaigns and initiatives to promote the bike-share program. These may include email, social media, and other channels.
+
+-   **Cyclistic marketing analytics team**: A team of data analysts who are responsible for collecting, analyzing, and reporting data that helps guide Cyclistic marketing strategy. You joined this team six months ago and have been busy learning about Cyclistic's mission and business goals --- as well as how you, as a junior data analyst, can help Cyclistic achieve them.
+
+-   **Cyclistic executive team**: The notoriously detail-oriented executive team will decide whether to approve the recommended marketing program.
+
+About the company In 2016, Cyclistic launched a successful bike-share offering. Since then, the program has grown to a fleet of 5,824 bicycles that are geotracked and locked into a network of 692 stations across Chicago. The bikes can be unlocked from one station and returned to any other station in the system anytime.
+
+Until now, Cyclistic's marketing strategy relied on building general awareness and appealing to broad consumer segments. One 2 approach that helped make these things possible was the flexibility of its pricing plans: single-ride passes, full-day passes, and annual memberships. Customers who purchase single-ride or full-day passes are referred to as casual riders. Customers who purchase annual memberships are Cyclistic members.
+
+Cyclistic's finance analysts have concluded that annual members are much more profitable than casual riders. Although the pricing flexibility helps Cyclistic attract more customers, Moreno believes that maximizing the number of annual members will be key to future growth. Rather than creating a marketing campaign that targets all-new customers, Moreno believes there is a very good chance to convert casual riders into members. She notes that casual riders are already aware of the Cyclistic program and have chosen Cyclistic for their mobility needs.
+
+Moreno has set a clear goal: Design marketing strategies aimed at converting casual riders into annual members. In order to do that, however, the marketing analyst team needs to better understand how annual members and casual riders differ, why casual riders would buy a membership, and how digital media could affect their marketing tactics. Moreno and her team are interested in analyzing the Cyclistic historical bike trip data to identify trends.
+
+## Step 1: ASK
+
+**What is the problem you are trying to solve?**
+
+The problem is to be that how can we increase the annual member ship of the Cyclist bike share company. The director of marketing believes that if we want to convert the casual member to annual members, our company will grow successfully. Here we face the issued how do annual members and casual riders use Cyclistic bikes differently? And why would casual riders buy Cyclistic annual memberships?
+
+**How can your insights drive business decisions?**
+
+My insights can drive the business decision in many ways like it can create the new opportunity and make better decision about resource allocation. It can also improve the company customer expirence and reduce the cost for profitability.
+
+## Step 2: PREPARE
+
+The source of the data is here [Download the Cyclistic trip data](https://divvy-tripdata.s3.amazonaws.com/index.html). (Note: The datasets have a different name because Cyclistic is a fictional company. For the purposes of this case study, the datasets are appropriate and will enable you to answer the business questions. The data has been made available by Motivate International Inc. under this [license](https://www.divvybikes.com/data-license-agreement).) You can choose to work with an entire year of data, or just one quarter of a year.
+
+The data I am using is from July 2022 to June 2023 and is stored in 12 separate CSV files, one for each month. It can include the ride_id type of the bike and start and end time of ride taking along with station names. If the user is a casual member or has an annual membership, they will have different privileges.
+
+## Step 3: PROCESS
+
+I used RStudio because the dataset was too large to fit in the row limit of Excel or Google Sheets, and R can easily work with large amounts of data. We know that we are working on a one-year dataset, which consists of 12 unique files for each month. R gives us the flexibility to merge all of the files into a single CSV file using the bind_rows() function.
+
+### Loading Necessary Package
+
+```{r loading-package}
+# Set CRAN mirror
+options(repos = c(CRAN = "https://cran.rstudio.com"))
+
+# Install and load necessary packages
+install.packages(c("tidyverse", "lubridate", "ggplot2", "rmarkdown", "dplyr"))
+library(tidyverse)
+library(lubridate)
+library(ggplot2)
+library(dplyr)
+```
+
+### Collecting Data
+
+```{r collecting-data}
+# Set working directory
+setwd("C:/Users/anonymous/Downloads/Data Analyst/Google Data/Google Case Study/Cyclist Ride CSV")
+
+# Reading data from CSV files
+july_22 <- read.csv("202207-divvy-tripdata.csv")
+august_22 <- read.csv("202208-divvy-tripdata.csv")
+september_22 <- read.csv("202209-divvy-publictripdata.csv")
+october_22 <- read.csv("202210-divvy-tripdata.csv")
+november_22 <- read.csv("202211-divvy-tripdata.csv")
+december_22 <- read.csv("202212-divvy-tripdata.csv")
+january_23 <- read.csv("202301-divvy-tripdata.csv")
+febuary_23 <- read.csv("202302-divvy-tripdata.csv")
+march_23 <- read.csv("202303-divvy-tripdata.csv")
+april_23 <- read.csv("202304-divvy-tripdata.csv")
+may_23 <- read.csv("202305-divvy-tripdata.csv")
+june_23 <- read.csv("202306-divvy-tripdata.csv")
+# Repeat the above line for other months
+
+# Combine data into a single file
+all_trip <- bind_rows(july_22, august_22, september_22, october_22, november_22, december_22,january_23, febuary_23, march_23, april_23, may_23, june_23)
+
+# Remove unnecessary columns
+all_trip <- all_trip %>% select(-c(start_lat, start_lng, end_lat, end_lng))
+
+```
+
+### Cleaning Up Data
+
+```{r clean-data}
+# Recode member_casual column
+all_trip <- all_trip %>% mutate(member_casual = recode(member_casual, "Subscriber" = "member", "Customer" = "casual"))
+
+# Add date-related columns
+all_trip$date <- as.Date(all_trip$started_at)
+all_trip$month <- format(as.Date(all_trip$date), "%m")
+all_trip$day <- format(as.Date(all_trip$date), "%d")
+all_trip$year <- format(as.Date(all_trip$date), "%Y")
+all_trip$day_of_week <- format(as.Date(all_trip$date), "%A")
+
+# Add ride_length calculation
+all_trip$ride_length <- difftime(all_trip$ended_at, all_trip$started_at)
+
+# Convert ride_length to numeric
+all_trip$ride_length <- as.numeric(as.character(all_trip$ride_length))
+
+# Remove "bad" data
+all_trip_v2 <- all_trip[!(all_trip$start_station_name == "HQ QR" | all_trip$ride_length < 0),]
+
+```
+
+## Step 4: ANALYZE PHASE
+
+### Descriptive Analysis
+
+```{r descriptive-analysis}
+# Descriptive analysis on ride_length
+summary(all_trip_v2$ride_length)
+
+# Compare members and casual users
+aggregate(all_trip_v2$ride_length ~ all_trip_v2$member_casual, FUN = mean)
+aggregate(all_trip_v2$ride_length ~ all_trip_v2$member_casual, FUN = median)
+aggregate(all_trip_v2$ride_length ~ all_trip_v2$member_casual, FUN = max)
+aggregate(all_trip_v2$ride_length ~ all_trip_v2$member_casual, FUN = min)
+
+```
+
+### Visualization
+
+```{r visualization}
+# Number of rides by rider type and weekday
+all_trip_v2 %>%
+  mutate(weekday = wday(started_at, label = TRUE)) %>%
+  group_by(member_casual, weekday) %>%
+  summarise(number_of_rides = n(), average_duration = mean(ride_length)) %>%
+  arrange(member_casual, weekday) %>%
+  ggplot(aes(x = weekday, y = number_of_rides, fill = member_casual)) + geom_col(position = "dodge")
+
+# Average duration by rider type and weekday
+all_trip_v2 %>%
+  mutate(weekday = wday(started_at, label = TRUE)) %>%
+  group_by(member_casual, weekday) %>%
+  summarise(number_of_rides = n(), average_duration = mean(ride_length)) %>%
+  arrange(member_casual, weekday) %>%
+  ggplot(aes(x = weekday, y = average_duration, fill = member_casual)) + geom_col(position = "dodge")
+
+```
+
+## Step 5: SHARE PHASE
+
+```{r export}
+# Export summary file
+counts <- aggregate(all_trip_v2$ride_length ~ all_trip_v2$member_casual + all_trip_v2$day_of_week, FUN = mean)
+write.csv(counts, file = "C:\\Users\\anonymous\\Downloads\\Data Analyst\\Google Data\\Google Case Study\\Cyclist Ride CSV\\cyclist_trip.csv")
+
+```
+
+## Step 6: ACT
+
+Once we have finished creating the visualizations, we need to use the information we have learned to prepare and present the deliverables that were asked of us.
+
+-   Cyclistic should create marketing campaigns that specifically target casual riders during their leisure rides and highlight the benefits of annual memberships for daily commuters.
+
+-   Cyclistic can emphasize its inclusivity by promoting the availability of reclining bikes, hand tricycles, and cargo bikes.
+
+-   Cyclistic can implement a user engagement strategy to keep annual members active.
